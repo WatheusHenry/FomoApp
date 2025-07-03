@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Platform, StyleSheet, Text, View } from "react-native";
 import { Marker } from "react-native-maps";
 
 interface Props {
@@ -13,7 +13,7 @@ export default function UserLocationMarker({ latitude, longitude }: Props) {
       coordinate={{ latitude, longitude }}
       anchor={{ x: 0.5, y: 0.5 }}
       zIndex={999}
-      tracksViewChanges={false}
+      tracksViewChanges={Platform.OS === "ios" ? false : true} // true no Android
     >
       <View style={styles.container}>
         <View style={styles.userMarker}>{""}</View>
@@ -24,7 +24,11 @@ export default function UserLocationMarker({ latitude, longitude }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: "center", justifyContent: "center" },
+  container: {
+    alignItems: "center",
+    justifyContent: "center",
+    alignSelf: "center",
+  },
   placeText: {
     backgroundColor: "#B9FA5E",
     borderColor: "#468C38",
@@ -32,7 +36,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 1,
     fontWeight: "600",
-    fontSize: 16,
+    fontSize: 13,
     color: "#468C38",
     textAlign: "center",
   },

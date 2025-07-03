@@ -20,7 +20,8 @@ export default function MainBottomSheet() {
       normalized.includes("restaurant") ||
       normalized.includes("food") ||
       normalized.includes("dinner") ||
-      normalized.includes("shop")
+      normalized.includes("shop") ||
+      normalized.includes("bakery")
     )
       return require("../../assets/images/RestaurantPin.png");
     if (normalized.includes("bar"))
@@ -42,7 +43,7 @@ export default function MainBottomSheet() {
       const coords = await getCoords();
       const locationInfo = await getLocation();
       if (coords && locationInfo) {
-        setCity(locationInfo.city || "");
+        setCity(locationInfo.city || locationInfo.subregion || "");
         setRegion(locationInfo.region || "");
 
         const places = await fetchNearbyPlaces(
@@ -70,6 +71,7 @@ export default function MainBottomSheet() {
       ref={bottomSheetRef}
       index={0}
       snapPoints={["13%", "50%"]}
+      enableDynamicSizing
       backgroundStyle={{ backgroundColor: "#2C3035" }}
       keyboardBehavior="interactive"
     >
@@ -91,7 +93,7 @@ export default function MainBottomSheet() {
         </View>
         <View
           style={{
-            marginTop: 20,
+            marginTop: 25,
             flexDirection: "row",
             alignItems: "center",
             justifyContent: "space-between",

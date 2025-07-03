@@ -15,7 +15,6 @@ const getLocation = async () => {
       latitude: coords.latitude,
       longitude: coords.longitude,
     });
-
     return address[0];
   } catch (error) {
     console.error("Erro ao obter localização:", error);
@@ -31,4 +30,4 @@ const getCoords = async () => {
   return coords;
 };
 
-export { getLocation, getCoords };
+export { getCoords, getLocation };
