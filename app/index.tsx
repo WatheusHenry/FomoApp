@@ -2,11 +2,12 @@ import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View, Alert } from "react-native";
 import * as Location from "expo-location";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import LocationComponent from "../components/Location";
+import WheaterComponent from "../components/Wheater";
 
 import MapContainer from "../components/MapContainer";
 import LocationError from "../components/LocationError";
-import MainBottomSheet from "../components/sheets/MainBottomSheet";
-import CategoryPills from "@/components/CategoryPills";
+import HomeButtons from "@/components/HomeButtons";
 
 export default function Index() {
   const [location, setLocation] = useState(null);
@@ -67,11 +68,9 @@ export default function Index() {
   return (
     <GestureHandlerRootView style={styles.container}>
       <MapContainer location={location} selectedCategory={selectedCategory} />
-      <CategoryPills
-        onSelect={setSelectedCategory}
-        selected={selectedCategory}
-      />
-      <MainBottomSheet />
+      <LocationComponent />
+      <WheaterComponent></WheaterComponent>
+      <HomeButtons />
     </GestureHandlerRootView>
   );
 }

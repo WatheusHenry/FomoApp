@@ -13,7 +13,7 @@ const getBackendUrl = () => {
 };
 
 const CACHE_KEY = "nearby_places_cache";
-const CACHE_DURATION_MS = 5 * 60 * 1;
+const CACHE_DURATION_MS = 5 * 60 * 1000;
 // const DEFAULT_TYPES = ["night_club", "restaurant", "bar", "cafe", "bakery"];
 
 let cachedData: any[] = [];

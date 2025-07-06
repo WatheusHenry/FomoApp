@@ -1,7 +1,7 @@
 import { fetchNearbyPlaces } from "@/utils/fetchNearbyPlaces";
 import React, { useEffect, useState } from "react";
-import { StyleSheet } from "react-native";
-import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
+import { Image, Platform, StyleSheet, Text, View } from "react-native";
+import MapView, { Marker, PROVIDER_GOOGLE, Region } from "react-native-maps";
 import { nightMapStyle } from "../const/nightMapStyle";
 import UserLocationMarker from "./UserLocationMarker";
 
@@ -35,18 +35,21 @@ interface Place {
 export default function MapContainer({ location, selectedCategory }: Props) {
   const [places, setPlaces] = useState<Place[]>([]);
   const [loading, setLoading] = useState(false);
+  const [currentZoom, setCurrentZoom] = useState(location.latitudeDelta);
+
+  // Definir o limiar de zoom (ajuste conforme necessário)
+  const ZOOM_THRESHOLD = 0.01; // Quanto menor o valor, mais "zoom in"
 
   useEffect(() => {
     const loadPlaces = async () => {
       setLoading(true);
       try {
-      const fetched = await fetchNearbyPlaces(
-        location.latitude,
-        location.longitude
-      );
-      // console.log(fetched);
-      setPlaces(fetched);
-      console.log(`🏪 ${fetched.length} locais carregados`);
+        const fetched = await fetchNearbyPlaces(
+          location.latitude,
+          location.longitude
+        );
+        setPlaces(fetched);
+        console.log(`🏪 ${fetched.length} locais carregados`);
       } catch (error) {
         console.error("❌ Erro ao carregar locais:", error);
       } finally {
@@ -57,24 +60,6 @@ export default function MapContainer({ location, selectedCategory }: Props) {
     loadPlaces();
   }, [location]);
 
-  const getCategoryFromTypes = (types: string[] = []): string => {
-    const categoryMap = {
-      night_club: "Festas",
-      bar: "Bares",
-      restaurant: "Restaurantes",
-      cafe: "Cafés",
-      bakery: "Padarias",
-    };
-
-    for (const [type, category] of Object.entries(categoryMap)) {
-      if (types.some((t) => t.includes(type))) {
-        return category;
-      }
-    }
-
-    return "Outro";
-  };
-
   const getCoordinates = (place: Place) => {
     return {
       latitude:
@@ -84,28 +69,36 @@ export default function MapContainer({ location, selectedCategory }: Props) {
     };
   };
 
-  const filteredPlaces =
-    selectedCategory === null
-      ? []
-      : places.filter((place) => {
-          const placeCategory = getCategoryFromTypes(place.types);
-          return placeCategory.toLowerCase() === selectedCategory.toLowerCase();
-        });
+  const handleRegionChangeComplete = (region: Region) => {
+    setCurrentZoom(region.latitudeDelta);
+    console.log("🔍 Zoom level:", region.latitudeDelta);
+  };
 
-  // Debug: Log das categorias encontradas
-  useEffect(() => {
-    if (places.length > 0) {
-      const categories = places.map((place) => ({
-        name: place.displayName?.text,
-        types: place.types,
-        category: getCategoryFromTypes(place.types),
-      }));
+  const renderMarkerContent = (place: Place) => {
+    const isZoomedOut = currentZoom > ZOOM_THRESHOLD;
 
-      console.log("🏷️ Categorias encontradas:", [
-        ...new Set(categories.map((c) => c.category)),
-      ]);
+    if (isZoomedOut) {
+      // Renderizar apenas bolinha quando zoom out
+      return (
+        <View style={styles.dotMarker}>
+          <View style={styles.dot} />
+        </View>
+      );
+    } else {
+      // Renderizar ícone completo quando zoom in
+      return (
+        <View style={styles.fullMarker}>
+          <Image
+            source={require("../assets/icons/Fire.png")}
+            style={styles.markerIcon}
+          />
+          <Text style={styles.markerText}>
+            {place.displayName?.text || "Local sem nome"}
+          </Text>
+        </View>
+      );
     }
-  }, [places]);
+  };
 
   return (
     <MapView
@@ -113,32 +106,64 @@ export default function MapContainer({ location, selectedCategory }: Props) {
       style={StyleSheet.absoluteFillObject}
       region={location}
       customMapStyle={nightMapStyle}
+      minZoomLevel={13}
+      onRegionChangeComplete={handleRegionChangeComplete}
     >
       <UserLocationMarker
         latitude={location.latitude}
         longitude={location.longitude}
       />
 
-      {filteredPlaces.map((place) => {
+      {places.map((place) => {
         const coordinates = getCoordinates(place);
-
-        if (!coordinates.latitude || !coordinates.longitude) {
-          console.warn(
-            "⚠️ Local sem coordenadas válidas:",
-            place.displayName?.text
-          );
-          return null;
-        }
 
         return (
           <Marker
-            key={place.id || `${coordinates.latitude}-${coordinates.longitude}`}
+            tracksViewChanges={true}
+            key={place.id}
+            anchor={{ x: 0.5, y: 0.5 }}
             coordinate={coordinates}
             title={place.displayName?.text || "Local sem nome"}
             description={place.formattedAddress || "Endereço não disponível"}
-          />
+          >
+            {renderMarkerContent(place)}
+          </Marker>
         );
       })}
     </MapView>
   );
 }
+
+const styles = StyleSheet.create({
+  fullMarker: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    maxWidth: 120,
+    alignContent: "center",
+    justifyContent: "center",
+  },
+  markerIcon: {
+    width: 31,
+    height: 35,
+  },
+  markerText: {
+    color: "#fff",
+    fontWeight: "600",
+    flexWrap: "wrap",
+    fontSize: 12,
+    // textAlign: "center",
+  },
+  dotMarker: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  dot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: "#FF6B6B", // Cor da bolinha (ajuste conforme seu tema)
+    borderWidth: 2,
+    borderColor: "#fff",
+  },
+});

@@ -88,7 +88,11 @@ export default function MainBottomSheet() {
             <Text style={styles.subtitle}>{region}</Text>
           </View>
           <View>
-            <Button onPress={() => console.log("Checkin")}></Button>
+            <Button
+              onPress={() => console.log("Checkin")}
+              text="Check-in"
+              type="CheckIn"
+            ></Button>
           </View>
         </View>
         <View

@@ -1,19 +1,48 @@
 import React from "react";
-import { TouchableOpacity, Text, StyleSheet, View, Image } from "react-native";
+import {
+  TouchableOpacity,
+  Text,
+  StyleSheet,
+  View,
+  Image,
+  ViewStyle,
+  StyleProp,
+  Platform,
+} from "react-native";
 
 interface Props {
   onPress: () => void;
+  text: string;
+  type: string;
+  style?: StyleProp<ViewStyle>;
 }
 
-export default function Button({ onPress }: Props) {
+// 1. Mapeamento de tipo -> ícone
+const iconMap: Record<string, any> = {
+  CheckIn: require("../assets/icons/CheckIn.png"),
+  Search: require("../assets/icons/Search.png"),
+  Shuffle: require("../assets/icons/shuffle.png"),
+};
+
+export default function Button({ onPress, text, type, style }: Props) {
+  const isTextEmpty = text.trim() === "";
+  const iconSource = iconMap[type] ?? iconMap["CheckIn"]; // fallback
+
   return (
-    <TouchableOpacity style={styles.button} onPress={onPress}>
+    <TouchableOpacity style={[styles.button, style]} onPress={onPress}>
       <View style={styles.content}>
         <Image
-          source={require("../assets/icons/CheckIn.png")}
-          style={[styles.icon, { width: 18, height: 18 }]}
+          source={iconSource}
+          style={[
+            styles.icon,
+            {
+              width: iconMap[type] === 6 ? 25 : 29,
+              height: iconMap[type] === 6 ? 25 : 28,
+              marginRight: isTextEmpty ? 0 : 6,
+            },
+          ]}
         />
-        <Text style={styles.text}>Check-in</Text>
+        {!isTextEmpty && <Text style={styles.text}>{text}</Text>}
       </View>
     </TouchableOpacity>
   );
@@ -22,26 +51,35 @@ export default function Button({ onPress }: Props) {
 const styles = StyleSheet.create({
   button: {
     backgroundColor: "#B5FF5D",
-    borderRadius: 14,
-    paddingVertical: 8,
-    paddingHorizontal: 14,
+    borderRadius: 18,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
     alignSelf: "flex-start",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
+
   },
   content: {
     flexDirection: "row",
     alignItems: "center",
+    textAlign: "center",
   },
   icon: {
     marginRight: 6,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
   },
   text: {
-    fontWeight: "700",
     color: "#1E5514",
-    fontSize: 18,
+    fontSize: 22,
+    elevation: 5,
+    lineHeight: 28,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    // Fallback para Android
+    fontFamily: Platform.select({
+      android: "Onest_900Black",
+      ios: "Onest-Black",
+    }),
   },
 });

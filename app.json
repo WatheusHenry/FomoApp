@@ -14,8 +14,10 @@
         "googleMapsApiKey": "AIzaSyBkRcDClCTq7KlFuhiHQ8SH4x6cxKUpBR4"
       }
     },
-    "plugins": [
-      "expo-font"
+    "plugins": ["expo-font"],
+    "fonts": [
+      "./assets/fonts/Onest-VariableFont_wght.ttf",
+      "./assets/fonts/Satoshi-Variable.ttf"
     ]
   },
   "android": {
@@ -30,6 +32,7 @@
       }
     }
   },
+
   "web": {
     "bundler": "metro",
     "output": "static",
