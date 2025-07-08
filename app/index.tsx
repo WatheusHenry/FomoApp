@@ -1,23 +1,59 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { StyleSheet, Text, View, Alert } from "react-native";
 import * as Location from "expo-location";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import LocationComponent from "../components/Location";
 import WheaterComponent from "../components/Wheater";
-
 import MapContainer from "../components/MapContainer";
 import LocationError from "../components/LocationError";
 import HomeButtons from "@/components/HomeButtons";
+import SearchPlaces from "@/components/sheets/SearchPlaces";
+import BottomSheet from "@gorhom/bottom-sheet";
+import { fetchNearbyPlaces } from "@/utils/fetchNearbyPlaces";
+
+// Interface para o tipo Place
+interface Place {
+  id: string;
+  name: string;
+  address: string;
+  types: string[];
+  location: {
+    lng: number;
+    lat: number;
+  };
+}
 
 export default function Index() {
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+  // Estado compartilhado para os lugares
+  const [places, setPlaces] = useState<Place[]>([]);
+  const [placesLoading, setPlacesLoading] = useState(false);
+
+  const bottomSheetRef = useRef<BottomSheet>(null);
 
   useEffect(() => {
     getCurrentLocation();
   }, []);
+
+  // Função para buscar lugares próximos
+  const loadNearbyPlaces = async (lat: number, lng: number) => {
+    try {
+      setPlacesLoading(true);
+      const fetchedPlaces = await fetchNearbyPlaces(lat, lng);
+      setPlaces(fetchedPlaces);
+    } catch (error) {
+      console.error("❌ Erro ao carregar locais:", error);
+    } finally {
+      setPlacesLoading(false);
+    }
+  };
+
+  const handleOpenSearchSheet = () => {
+    bottomSheetRef.current?.snapToIndex(1);
+  };
 
   const getCurrentLocation = async () => {
     try {
@@ -36,14 +72,18 @@ export default function Index() {
         accuracy: Location.Accuracy.High,
       });
 
-      setLocation({
+      const newLocation = {
         latitude: coords.latitude,
         longitude: coords.longitude,
         latitudeDelta: 0.01,
         longitudeDelta: 0.01,
-      });
+      };
 
+      setLocation(newLocation);
       setErrorMsg(null);
+
+      // Carregar lugares próximos após obter a localização
+      await loadNearbyPlaces(coords.latitude, coords.longitude);
     } catch (err) {
       setErrorMsg("Erro ao obter localização.");
     } finally {
@@ -67,39 +107,27 @@ export default function Index() {
 
   return (
     <GestureHandlerRootView style={styles.container}>
-      <MapContainer location={location} selectedCategory={selectedCategory} />
+      {/* Passa os lugares como props */}
+      <MapContainer location={location} places={places} />
       <LocationComponent />
-      <WheaterComponent></WheaterComponent>
-      <HomeButtons />
+      <WheaterComponent />
+
+      <HomeButtons onSearchPress={handleOpenSearchSheet} />
+
+      {/* Passa os lugares e estados para o SearchPlaces */}
+      <SearchPlaces
+        ref={bottomSheetRef}
+        places={places}
+        loading={placesLoading}
+        onRefresh={() =>
+          loadNearbyPlaces(location.latitude, location.longitude)
+        }
+      />
     </GestureHandlerRootView>
   );
 }
 
 const styles = StyleSheet.create({
-  pillsContainer: {
-    position: "absolute",
-    bottom: "15%",
-    left: 0,
-    right: 0,
-    flexDirection: "row",
-    justifyContent: "center",
-    gap: 8,
-    paddingHorizontal: 16,
-  },
-
-  pill: {
-    backgroundColor: "#3F444B",
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 12,
-  },
-
-  pillText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
-    fontFamily: "Onest",
-  },
   container: { flex: 1 },
   centered: { flex: 1, justifyContent: "center", alignItems: "center" },
 });

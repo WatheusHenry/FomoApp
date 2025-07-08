@@ -37,36 +37,28 @@ const fetchFromBackend = async (
   longitude: number,
   options: FetchNearbyPlacesOptions = {}
 ): Promise<BackendResponse> => {
-  const {
-    radius = 15000,
-    // types = DEFAULT_TYPES,
-    limit = 120,
-  } = options;
-
-  const params = new URLSearchParams({
-    lat: latitude.toString(),
-    lng: longitude.toString(),
-    radius: radius.toString(),
-    // types: types.join(","),
-    limit: limit.toString(),
-  });
+  const { radius = 15000, types, limit = 20 } = options;
 
   const backendUrl = getBackendUrl();
-  const fullUrl = `${backendUrl}/nearby?${params}`;
-
-  console.log(`🌐 Fazendo requisição para: ${fullUrl}`);
+  const fullUrl = `${backendUrl}/places/nearby`;
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 segundos timeout
+  const timeoutId = setTimeout(() => controller.abort(), 15000);
 
   try {
     const response = await fetch(fullUrl, {
-      method: "GET",
+      method: "POST",
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
       },
       signal: controller.signal,
+      body: JSON.stringify({
+        location: { lat: latitude, lng: longitude },
+        radius,
+        type: "restaurant",
+        maxResults: limit,
+      }),
     });
 
     clearTimeout(timeoutId);
@@ -78,8 +70,11 @@ const fetchFromBackend = async (
     }
 
     const data = await response.json();
-    console.log(`✅ Resposta recebida: ${data.places?.length || 0} lugares`);
-    return data;
+    console.log(`✅ Resposta recebida: ${data.data?.length || 0} lugares`);
+    return {
+      fromCache: data.cached,
+      places: data.data,
+    };
   } catch (error) {
     clearTimeout(timeoutId);
     console.error("❌ Erro na requisição:", error);
@@ -96,20 +91,20 @@ export const fetchNearbyPlaces = async (
   const now = Date.now();
 
   // Verifica cache existente no AsyncStorage
-  if (!cachedAt || !cachedCoords || cachedData.length === 0) {
-    try {
-      const cachedString = await AsyncStorage.getItem(CACHE_KEY);
-      if (cachedString) {
-        const parsed = JSON.parse(cachedString);
-        cachedAt = parsed.cachedAt;
-        cachedCoords = parsed.cachedCoords;
-        cachedData = parsed.cachedData;
-        console.log("💾 Cache carregado do AsyncStorage");
-      }
-    } catch (err) {
-      console.warn("⚠️ Falha ao carregar cache:", err);
-    }
-  }
+  // if (!cachedAt || !cachedCoords || cachedData.length === 0) {
+  //   try {
+  //     const cachedString = await AsyncStorage.getItem(CACHE_KEY);
+  //     if (cachedString) {
+  //       const parsed = JSON.parse(cachedString);
+  //       cachedAt = parsed.cachedAt;
+  //       cachedCoords = parsed.cachedCoords;
+  //       cachedData = parsed.cachedData;
+  //       console.log("💾 Cache carregado do AsyncStorage");
+  //     }
+  //   } catch (err) {
+  //     console.warn("⚠️ Falha ao carregar cache:", err);
+  //   }
+  // }
 
   const age = now - (cachedAt || 0);
   const isCacheValid = age < CACHE_DURATION_MS;
