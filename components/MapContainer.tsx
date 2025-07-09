@@ -117,7 +117,12 @@ const SmoothAnimatedMarker: React.FC<SmoothAnimatedMarkerProps> = ({
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
+  // CORREÇÃO: Estado para controlar a performance do marcador
+  const [isTracking, setIsTracking] = useState(true);
+
   useEffect(() => {
+    // Ativa o rastreamento antes de iniciar a animação
+    setIsTracking(true);
     const animations = shouldShowIcon
       ? [
           Animated.timing(iconOpacity, {
@@ -144,7 +149,10 @@ const SmoothAnimatedMarker: React.FC<SmoothAnimatedMarkerProps> = ({
           }),
         ];
 
-    Animated.parallel(animations).start();
+    Animated.parallel(animations).start(() => {
+      // Desativa o rastreamento QUANDO a animação termina para melhorar a performance
+      setIsTracking(false);
+    });
   }, [shouldShowIcon, iconOpacity, dotOpacity]);
 
   const handlePress = () => {
@@ -202,7 +210,8 @@ const SmoothAnimatedMarker: React.FC<SmoothAnimatedMarkerProps> = ({
 
   return (
     <Marker
-      tracksViewChanges={true}
+      // CORREÇÃO: Propriedade controlada pelo estado para otimização
+      tracksViewChanges={isTracking}
       key={place.id}
       anchor={{ x: 0.1, y: 0.1 }}
       coordinate={coordinates}
@@ -240,11 +249,13 @@ const SmoothAnimatedMarker: React.FC<SmoothAnimatedMarkerProps> = ({
 };
 
 // =============================================
-// MAIN COMPONENT
+// COMPONENTE PRINCIPAL MapContainer (com as alterações)
 // =============================================
 const MapContainer: React.FC<Props> = ({ location, places, onMarkerPress }) => {
   const [currentZoom, setCurrentZoom] = useState(location.latitudeDelta);
   const mapRef = useRef<MapView>(null);
+
+  // O estado e o useEffect para 'selectedPlace' foram removidos.
 
   const handleRegionChangeComplete = (region: Region) => {
     setCurrentZoom(region.latitudeDelta);
@@ -252,6 +263,7 @@ const MapContainer: React.FC<Props> = ({ location, places, onMarkerPress }) => {
 
   const shouldShowIcon = currentZoom < ZOOM_THRESHOLD;
 
+  // CORREÇÃO: A função agora dispara as duas ações imediatamente.
   const handleMarkerPress = (place: Place) => {
     const coordinates = getCoordinates(place);
 
@@ -263,9 +275,11 @@ const MapContainer: React.FC<Props> = ({ location, places, onMarkerPress }) => {
         longitudeDelta: MARKER_ZOOM_DELTA,
       };
 
+      // Ação 1: Inicia a animação de zoom
       mapRef.current?.animateToRegion(newRegion, ZOOM_ANIMATION_DURATION);
     }
 
+    // Ação 2: Inicia a abertura do Bottom Sheet imediatamente
     if (onMarkerPress) {
       onMarkerPress(place);
     }
@@ -310,15 +324,15 @@ const MapContainer: React.FC<Props> = ({ location, places, onMarkerPress }) => {
 const styles = StyleSheet.create({
   markerContainer: {
     position: "relative",
-    width: 48,
-    height: 49,
+    width: 53,
+    height: 54,
     justifyContent: "center",
     alignItems: "center",
   },
   iconContainer: {
     position: "absolute",
-    width: 48,
-    height: 49,
+    width: 53,
+    height: 54,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -330,8 +344,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   markerIcon: {
-    width: 32,
-    height: 33,
+    width: 40,
+    height: 40,
     resizeMode: "contain",
   },
   dotMarker: {

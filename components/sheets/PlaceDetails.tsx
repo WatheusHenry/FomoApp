@@ -1,12 +1,15 @@
-import React, { forwardRef, useMemo } from "react";
+import React, { forwardRef, useEffect, useMemo, useState } from "react";
 import {
   StyleSheet,
   Text,
   View,
   TouchableOpacity,
   ScrollView,
+  ActivityIndicator,
+  Image,
 } from "react-native";
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
+import { fetchPlaceDetails } from "@/utils/fetchPlaceDetails"; // <- importar aqui
 
 interface Place {
   id: string;
@@ -26,10 +29,10 @@ interface Place {
   };
   formatted_phone_number?: string;
   website?: string;
+  // eslint-disable-next-line @typescript-eslint/array-type
   photos?: Array<{
-    photo_reference: string;
-    width: number;
-    height: number;
+    url: string;
+    reference: string;
   }>;
 }
 
@@ -40,10 +43,29 @@ interface PlaceDetailsProps {
 
 const PlaceDetails = forwardRef<BottomSheet, PlaceDetailsProps>(
   ({ place, onClose }, ref) => {
-    const snapPoints = useMemo(() => ["25%", "50%", "90%"], []);
+    const snapPoints = useMemo(() => ["25%", "50%"], []);
+    const [details, setDetails] = useState<Place | null>(null);
+    const [loading, setLoading] = useState(false);
 
+    useEffect(() => {
+      if (!place) return;
+      const loadDetails = async () => {
+        try {
+          setLoading(true);
+          const data = await fetchPlaceDetails(place.id);
+          setDetails(data);
+        } catch (err) {
+          console.error("❌ Erro ao buscar detalhes do local:", err);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      loadDetails();
+    }, [place]);
     if (!place) return null;
 
+    const shownPlace = details || place;
     return (
       <BottomSheet
         ref={ref}
@@ -55,30 +77,34 @@ const PlaceDetails = forwardRef<BottomSheet, PlaceDetailsProps>(
         handleIndicatorStyle={styles.handleIndicator}
       >
         <BottomSheetScrollView style={styles.content}>
-          {/* Header */}
           <View style={styles.header}>
             <View style={styles.headerLeft}>
               <TouchableOpacity style={styles.state}></TouchableOpacity>
               <View style={styles.headerText}>
                 <Text style={styles.placeName}>{place.name}</Text>
-                <Text style={styles.placeAddress}>{place.address}</Text>
+                <Text style={styles.placeAddress}>{shownPlace.address}</Text>
               </View>
             </View>
           </View>
-          <ScrollView horizontal={true}>
-            <TouchableOpacity style={styles.infoPills}>
-              <Text>Fechado</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.infoPills}>
-              <Text>Fechado</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.infoPills}>
-              <Text>Fechado</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.infoPills}>
-              <Text>Fechado</Text>
-            </TouchableOpacity>
-          </ScrollView>
+
+          {details?.photos && details.photos.length > 0 && (
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              {details.photos.slice(0, 5).map((photo, index) => (
+                <View key={index} style={{ marginRight: 10 }}>
+                  <Image
+                    source={{ uri: photo.url }}
+                    style={{
+                      width: 200,
+                      height: 120,
+                      borderRadius: 12,
+                      backgroundColor: "#444",
+                    }}
+                    resizeMode="cover"
+                  />
+                </View>
+              ))}
+            </ScrollView>
+          )}
         </BottomSheetScrollView>
       </BottomSheet>
     );
@@ -102,8 +128,7 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: "row",
-    verticalAlign: "top",
-    marginBottom: 16,
+    marginBottom: 20,
     paddingTop: 8,
   },
   headerLeft: {
@@ -139,7 +164,12 @@ const styles = StyleSheet.create({
     width: "auto",
     padding: 10,
     borderRadius: 10,
-    marginRight: 10,
+    marginRight: 6,
+  },
+  infoText: {
+    fontSize: 14,
+    fontWeight: "bold",
+    color: "#FFF",
   },
 });
 

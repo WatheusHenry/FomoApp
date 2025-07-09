@@ -53,7 +53,6 @@ const getPlaceIcon = (placeTypes: string[]) => {
   return require("../../assets/icons/Restaurant.png");
 };
 
-// eslint-disable-next-line react/display-name
 const SearchPlaces = forwardRef<BottomSheet, SearchPlacesProps>(
   ({ places, loading, onRefresh }, ref) => {
     const [searchQuery, setSearchQuery] = useState("");
@@ -166,6 +165,8 @@ const SearchPlaces = forwardRef<BottomSheet, SearchPlacesProps>(
 );
 
 export default SearchPlaces;
+SearchPlaces.displayName = "SearchPlaces";
+
 
 const styles = StyleSheet.create({
   contentContainer: {
