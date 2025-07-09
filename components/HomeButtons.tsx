@@ -1,7 +1,6 @@
 import { StyleSheet, View } from "react-native";
 import Button from "./Button";
 
-// --- 1. Defina a interface para as props ---
 interface HomeButtonsProps {
   onSearchPress: () => void;
 }
@@ -10,7 +9,6 @@ export default function HomeButtons({ onSearchPress }: HomeButtonsProps) {
   return (
     <View style={styles.content}>
       <Button
-        // --- 2. Use a prop no onPress ---
         onPress={onSearchPress}
         text=""
         type="Search"
@@ -33,7 +31,6 @@ export default function HomeButtons({ onSearchPress }: HomeButtonsProps) {
 }
 
 const styles = StyleSheet.create({
-  // ... (seus estilos continuam os mesmos)
   content: {
     position: "absolute",
     bottom: "5%",

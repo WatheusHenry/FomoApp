@@ -1,6 +1,7 @@
-import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
+import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import React, { forwardRef, useState } from "react";
 import {
+  ActivityIndicator,
   Image,
   Platform,
   StyleSheet,
@@ -8,8 +9,6 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  ScrollView,
-  ActivityIndicator,
 } from "react-native";
 
 // Interface para o tipo Place
@@ -60,14 +59,15 @@ const SearchPlaces = forwardRef<BottomSheet, SearchPlacesProps>(
     const [searchQuery, setSearchQuery] = useState("");
 
     // Filtrar lugares baseado na busca
-    const filteredPlaces = places.filter((place) =>
-      place.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      place.address.toLowerCase().includes(searchQuery.toLowerCase())
+    const filteredPlaces = places.filter(
+      (place) =>
+        place.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        place.address.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     const renderPlaceItem = (place: Place) => {
       const icon = getPlaceIcon(place.types);
-      
+
       return (
         <TouchableOpacity
           key={place.id}
@@ -94,13 +94,14 @@ const SearchPlaces = forwardRef<BottomSheet, SearchPlacesProps>(
       <BottomSheet
         ref={ref}
         index={-1}
-        snapPoints={["60%", "90%"]}
+        snapPoints={["70%", "70%"]}
         backgroundStyle={{ backgroundColor: "#2C3035" }}
         enablePanDownToClose
         enableBlurKeyboardOnGesture
+        enableDynamicSizing={false}
         keyboardBehavior="interactive"
       >
-        <BottomSheetView style={styles.content}>
+        <View style={styles.contentContainer}>
           <View style={styles.header}>
             <Image
               source={require("../../assets/icons/Search.png")}
@@ -123,46 +124,42 @@ const SearchPlaces = forwardRef<BottomSheet, SearchPlacesProps>(
               <Text style={styles.loadingText}>Carregando lugares...</Text>
             </View>
           ) : (
-            <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-              {filteredPlaces.length > 0 ? (
-                <>
-                  <View style={styles.sectionHeader}>
-                    <Text style={styles.sectionTitle}>
-                      {searchQuery ? "Resultados da busca" : "Próximos de você"}
+            <>
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionTitle}>
+                  {searchQuery ? "Resultados da busca" : "Próximos de você"}
+                </Text>
+                <Text style={styles.sectionCount}>
+                  {filteredPlaces.length}{" "}
+                  {filteredPlaces.length === 1 ? "lugar" : "lugares"}
+                </Text>
+              </View>
+              <BottomSheetScrollView
+                contentContainerStyle={styles.scrollContentContainer}
+              >
+                {filteredPlaces.length > 0 ? (
+                  <>{filteredPlaces.map(renderPlaceItem)}</>
+                ) : (
+                  <View style={styles.emptyState}>
+                    <Text style={styles.emptyStateText}>
+                      {searchQuery
+                        ? "Nenhum lugar encontrado para a sua busca"
+                        : "Nenhum lugar encontrado próximo a você"}
                     </Text>
-                    <Text style={styles.sectionCount}>
-                      {filteredPlaces.length} {filteredPlaces.length === 1 ? "lugar" : "lugares"}
-                    </Text>
+                    <TouchableOpacity
+                      style={styles.refreshButton}
+                      onPress={onRefresh}
+                    >
+                      <Text style={styles.refreshButtonText}>
+                        Tentar novamente
+                      </Text>
+                    </TouchableOpacity>
                   </View>
-                  
-                  {filteredPlaces.map(renderPlaceItem)}
-                  
-                  <TouchableOpacity 
-                    style={styles.refreshButton}
-                    onPress={onRefresh}
-                  >
-                    <Text style={styles.refreshButtonText}>Atualizar lugares</Text>
-                  </TouchableOpacity>
-                </>
-              ) : (
-                <View style={styles.emptyState}>
-                  <Text style={styles.emptyStateText}>
-                    {searchQuery 
-                      ? "Nenhum lugar encontrado para a sua busca" 
-                      : "Nenhum lugar encontrado próximo a você"
-                    }
-                  </Text>
-                  <TouchableOpacity 
-                    style={styles.refreshButton}
-                    onPress={onRefresh}
-                  >
-                    <Text style={styles.refreshButtonText}>Tentar novamente</Text>
-                  </TouchableOpacity>
-                </View>
-              )}
-            </ScrollView>
+                )}
+              </BottomSheetScrollView>
+            </>
           )}
-        </BottomSheetView>
+        </View>
       </BottomSheet>
     );
   }
@@ -171,20 +168,20 @@ const SearchPlaces = forwardRef<BottomSheet, SearchPlacesProps>(
 export default SearchPlaces;
 
 const styles = StyleSheet.create({
-  content: { 
-    flex: 1,
-    paddingHorizontal: 20 
+  contentContainer: {
+    paddingHorizontal: 20,
+    paddingBottom: 30,
   },
   header: {
-    flexDirection: "row", 
-    alignItems: "center", 
+    flexDirection: "row",
+    alignItems: "center",
     justifyContent: "center",
-    marginBottom: 15
+    marginBottom: 15,
   },
   headerIcon: {
-    width: 30, 
-    height: 30, 
-    marginRight: 8
+    width: 30,
+    height: 30,
+    marginRight: 8,
   },
   headerText: {
     fontSize: 26,
@@ -207,10 +204,10 @@ const styles = StyleSheet.create({
       android: "Onest_600SemiBold",
       ios: "Onest_600SemiBold",
     }),
-    marginBottom: 20
+    marginBottom: 20,
   },
-  scrollView: {
-    flex: 1,
+  scrollContentContainer: {
+    paddingBottom: 150,
   },
   sectionHeader: {
     flexDirection: "row",
@@ -237,11 +234,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     borderRadius: 8,
     marginBottom: 8,
-    backgroundColor: "#35393E",
   },
   placeIcon: {
-    width: 42,
+    width: 38,
     height: 41,
+    resizeMode: "contain",
     marginRight: 12,
   },
   placeInfo: {

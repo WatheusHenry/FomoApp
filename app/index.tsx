@@ -8,6 +8,7 @@ import MapContainer from "../components/MapContainer";
 import LocationError from "../components/LocationError";
 import HomeButtons from "@/components/HomeButtons";
 import SearchPlaces from "@/components/sheets/SearchPlaces";
+import PlaceDetails from "@/components/sheets/PlaceDetails";
 import BottomSheet from "@gorhom/bottom-sheet";
 import { fetchNearbyPlaces } from "@/utils/fetchNearbyPlaces";
 
@@ -18,9 +19,23 @@ interface Place {
   address: string;
   types: string[];
   location: {
-    lng: number;
     lat: number;
+    lng: number;
   };
+  rating?: number;
+  user_ratings_total?: number;
+  price_level?: number;
+  opening_hours?: {
+    open_now?: boolean;
+    weekday_text?: string[];
+  };
+  formatted_phone_number?: string;
+  website?: string;
+  photos?: Array<{
+    photo_reference: string;
+    width: number;
+    height: number;
+  }>;
 }
 
 export default function Index() {
@@ -28,17 +43,18 @@ export default function Index() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Estado compartilhado para os lugares
   const [places, setPlaces] = useState<Place[]>([]);
   const [placesLoading, setPlacesLoading] = useState(false);
 
-  const bottomSheetRef = useRef<BottomSheet>(null);
+  const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
+
+  const searchBottomSheetRef = useRef<BottomSheet>(null);
+  const placeDetailsBottomSheetRef = useRef<BottomSheet>(null);
 
   useEffect(() => {
     getCurrentLocation();
   }, []);
 
-  // Função para buscar lugares próximos
   const loadNearbyPlaces = async (lat: number, lng: number) => {
     try {
       setPlacesLoading(true);
@@ -52,7 +68,17 @@ export default function Index() {
   };
 
   const handleOpenSearchSheet = () => {
-    bottomSheetRef.current?.snapToIndex(1);
+    searchBottomSheetRef.current?.snapToIndex(1);
+  };
+
+  const handleMarkerPress = (place: Place) => {
+    setSelectedPlace(place);
+    placeDetailsBottomSheetRef.current?.snapToIndex(1);
+  };
+
+  const handleClosePlaceDetails = () => {
+    placeDetailsBottomSheetRef.current?.close();
+    setSelectedPlace(null);
   };
 
   const getCurrentLocation = async () => {
@@ -79,10 +105,9 @@ export default function Index() {
         longitudeDelta: 0.01,
       };
 
-      setLocation(newLocation);
+      setLocation(newLocation as any);
       setErrorMsg(null);
 
-      // Carregar lugares próximos após obter a localização
       await loadNearbyPlaces(coords.latitude, coords.longitude);
     } catch (err) {
       setErrorMsg("Erro ao obter localização.");
@@ -107,21 +132,31 @@ export default function Index() {
 
   return (
     <GestureHandlerRootView style={styles.container}>
-      {/* Passa os lugares como props */}
-      <MapContainer location={location} places={places} />
+      <MapContainer
+        location={location}
+        places={places}
+        onMarkerPress={handleMarkerPress}
+      />
       <LocationComponent />
       <WheaterComponent />
 
       <HomeButtons onSearchPress={handleOpenSearchSheet} />
 
-      {/* Passa os lugares e estados para o SearchPlaces */}
+      {/* Bottom Sheet para busca de lugares */}
       <SearchPlaces
-        ref={bottomSheetRef}
+        ref={searchBottomSheetRef}
         places={places}
         loading={placesLoading}
         onRefresh={() =>
           loadNearbyPlaces(location.latitude, location.longitude)
         }
+      />
+
+      {/* Bottom Sheet para detalhes do lugar */}
+      <PlaceDetails
+        ref={placeDetailsBottomSheetRef}
+        place={selectedPlace}
+        onClose={handleClosePlaceDetails}
       />
     </GestureHandlerRootView>
   );
