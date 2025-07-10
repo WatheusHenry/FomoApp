@@ -1,3 +1,4 @@
+import { Place } from "@/interfaces/Place";
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import React, { forwardRef, useState } from "react";
 import {
@@ -11,19 +12,6 @@ import {
   View,
 } from "react-native";
 
-// Interface para o tipo Place
-interface Place {
-  id: string;
-  name: string;
-  address: string;
-  types: string[];
-  location: {
-    lng: number;
-    lat: number;
-  };
-}
-
-// Props do componente
 interface SearchPlacesProps {
   places: Place[];
   loading: boolean;
@@ -37,8 +25,6 @@ const TYPE_ICON_MAP: { [key: string]: any } = {
   food: require("../../assets/icons/Restaurant.png"),
   bakery: require("../../assets/icons/Restaurant.png"),
   cafe: require("../../assets/icons/Restaurant.png"),
-
-  // Entretenimento
   bar: require("../../assets/icons/Bar.png"),
   movie_theater: require("../../assets/icons/Party.png"),
   night_club: require("../../assets/icons/Party.png"),
@@ -57,7 +43,6 @@ const SearchPlaces = forwardRef<BottomSheet, SearchPlacesProps>(
   ({ places, loading, onRefresh }, ref) => {
     const [searchQuery, setSearchQuery] = useState("");
 
-    // Filtrar lugares baseado na busca
     const filteredPlaces = places.filter(
       (place) =>
         place.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -72,7 +57,6 @@ const SearchPlaces = forwardRef<BottomSheet, SearchPlacesProps>(
           key={place.id}
           style={styles.placeItem}
           onPress={() => {
-            // Aqui você pode adicionar a lógica para navegar para o local
             console.log("Local selecionado:", place.name);
           }}
         >
@@ -166,7 +150,6 @@ const SearchPlaces = forwardRef<BottomSheet, SearchPlacesProps>(
 
 export default SearchPlaces;
 SearchPlaces.displayName = "SearchPlaces";
-
 
 const styles = StyleSheet.create({
   contentContainer: {

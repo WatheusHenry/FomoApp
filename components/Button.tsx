@@ -17,7 +17,6 @@ interface Props {
   style?: StyleProp<ViewStyle>;
 }
 
-// 1. Mapeamento de tipo -> ícone
 const iconMap: Record<string, any> = {
   CheckIn: require("../assets/icons/CheckIn.png"),
   Search: require("../assets/icons/Search.png"),
@@ -76,7 +75,6 @@ const styles = StyleSheet.create({
     lineHeight: 28,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    // Fallback para Android
     fontFamily: Platform.select({
       android: "Onest_900Black",
       ios: "Onest-Black",

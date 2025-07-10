@@ -5,36 +5,11 @@ import {
   View,
   TouchableOpacity,
   ScrollView,
-  ActivityIndicator,
   Image,
 } from "react-native";
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
-import { fetchPlaceDetails } from "@/utils/fetchPlaceDetails"; // <- importar aqui
-
-interface Place {
-  id: string;
-  name: string;
-  address: string;
-  types: string[];
-  location: {
-    latitude: number;
-    longitude: number;
-  };
-  rating?: number;
-  user_ratings_total?: number;
-  price_level?: number;
-  opening_hours?: {
-    open_now?: boolean;
-    weekday_text?: string[];
-  };
-  formatted_phone_number?: string;
-  website?: string;
-  // eslint-disable-next-line @typescript-eslint/array-type
-  photos?: Array<{
-    url: string;
-    reference: string;
-  }>;
-}
+import { fetchPlaceDetails } from "@/utils/fetchPlaceDetails";
+import { Place } from "@/interfaces/Place";
 
 interface PlaceDetailsProps {
   place: Place | null;
@@ -43,7 +18,7 @@ interface PlaceDetailsProps {
 
 const PlaceDetails = forwardRef<BottomSheet, PlaceDetailsProps>(
   ({ place, onClose }, ref) => {
-    const snapPoints = useMemo(() => ["25%", "50%"], []);
+    const snapPoints = useMemo(() => ["25%", "60%"], []);
     const [details, setDetails] = useState<Place | null>(null);
     const [loading, setLoading] = useState(false);
 
@@ -66,6 +41,18 @@ const PlaceDetails = forwardRef<BottomSheet, PlaceDetailsProps>(
     if (!place) return null;
 
     const shownPlace = details || place;
+
+    const pills = [
+      "Cheio",
+      "Cover",
+      "Barato",
+      "Ar livre",
+      "Teste",
+      "Teste Grande",
+      "Teste Grande",
+      "Teste Grande",
+    ];
+
     return (
       <BottomSheet
         ref={ref}
@@ -95,7 +82,7 @@ const PlaceDetails = forwardRef<BottomSheet, PlaceDetailsProps>(
                     source={{ uri: photo.url }}
                     style={{
                       width: 200,
-                      height: 120,
+                      height: 150,
                       borderRadius: 12,
                       backgroundColor: "#444",
                     }}
@@ -105,6 +92,29 @@ const PlaceDetails = forwardRef<BottomSheet, PlaceDetailsProps>(
               ))}
             </ScrollView>
           )}
+
+          <View style={styles.pillsContiner}>
+            <Text style={{ color: "#989898", fontWeight: "600" }}>
+              Falaram sobre o lugar:
+            </Text>
+            <View style={styles.infoPills}>
+              {pills.map((pill, index) => (
+                <Text key={index} style={styles.pill}>
+                  {pill}
+                </Text>
+              ))}
+            </View>
+          </View>
+          <Text
+            style={{
+              color: "#3F444B",
+              fontWeight: "600",
+              textAlign: "center",
+              marginBottom: 10,
+            }}
+          >
+            Ultima atualização há 00 minutos
+          </Text>
         </BottomSheetScrollView>
       </BottomSheet>
     );
@@ -160,16 +170,36 @@ const styles = StyleSheet.create({
     borderStyle: "dashed",
   },
   infoPills: {
-    backgroundColor: "#35393E",
-    width: "auto",
-    padding: 10,
-    borderRadius: 10,
-    marginRight: 6,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginTop: 8,
   },
   infoText: {
     fontSize: 14,
     fontWeight: "bold",
     color: "#FFF",
+  },
+  pillsContiner: {
+    marginTop: 20,
+    marginBottom: 10,
+    backgroundColor: "#35393E",
+    padding: 10,
+    borderRadius: 10,
+    borderStyle: "dashed",
+    borderWidth: 1,
+    borderColor: "#3F444B",
+  },
+  pill: {
+    paddingVertical: 7,
+    paddingHorizontal: 10,
+    borderRadius: 10,
+    fontSize: 16,
+    backgroundColor: "#3F444B",
+    borderWidth: 2,
+    borderColor: "#2C3035",
+    color: "#B5B5B5",
+    fontWeight: "600",
   },
 });
 
