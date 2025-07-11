@@ -9,6 +9,7 @@ import {
   StyleProp,
   Platform,
 } from "react-native";
+import { useHaptics } from "@/hooks/useHaptics";
 
 interface Props {
   onPress: () => void;
@@ -18,17 +19,24 @@ interface Props {
 }
 
 const iconMap: Record<string, any> = {
-  CheckIn: require("../assets/icons/CheckIn.png"),
-  Search: require("../assets/icons/Search.png"),
-  Shuffle: require("../assets/icons/shuffle.png"),
+  CheckIn: require("../../../assets/icons/CheckIn.png"),
+  Search: require("../../../assets/icons/Search.png"),
+  Shuffle: require("../../../assets/icons/shuffle.png"),
 };
 
 export default function Button({ onPress, text, type, style }: Props) {
+  const { triggerButtonPress } = useHaptics();
   const isTextEmpty = text.trim() === "";
   const iconSource = iconMap[type] ?? iconMap["CheckIn"]; // fallback
 
+  const handlePress = () => {
+    // 🔥 Trigger haptic feedback
+    triggerButtonPress();
+    onPress();
+  };
+
   return (
-    <TouchableOpacity style={[styles.button, style]} onPress={onPress}>
+    <TouchableOpacity style={[styles.button, style]} onPress={handlePress}>
       <View style={styles.content}>
         <Image
           source={iconSource}
@@ -55,7 +63,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     alignSelf: "flex-start",
     shadowColor: "#000",
-
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
   },
   content: {
     flexDirection: "row",

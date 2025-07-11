@@ -1,8 +1,9 @@
-import { Coordinates } from "@/interfaces/Coordinates";
-import { Place } from "@/interfaces/Place";
-import React, { useEffect, useState, useRef } from "react";
+import { Coordinates } from "@/constants/places";
+import { Place } from "@/types/place";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import { Image, StyleSheet, View, Animated } from "react-native";
 import { Marker } from "react-native-maps";
+import { useHaptics } from "@/hooks/useHaptics";
 
 // =============================================
 // TIPOS E INTERFACES (Exportados para reuso)
@@ -13,23 +14,27 @@ interface SmoothAnimatedMarkerProps {
   shouldShowIcon: boolean;
   coordinates: Coordinates;
   onPress?: () => void;
+  isFocused?: boolean; // Nova prop para indicar se o marker está em foco
 }
 
 // =============================================
 // CONSTANTES DO MARCADOR
 // =============================================
-const ANIMATION_DURATION = 200;
-const BOUNCE_DURATION = 300;
+const ANIMATION_DURATION = 100;
+const BOUNCE_DURATION = 200;
+const BASE_SCALE = 0.8; // Escala base para ícones não focados (menores)
+const FOCUS_SCALE = 2; // Escala quando o marker está em foco (grande)
+const FOCUS_ANIMATION_DURATION = 200; // Duração da animação de foco
 
 const TYPE_ICON_MAP: { [key: string]: any } = {
-  restaurant: require("../assets/icons/Restaurant.png"),
-  meal_takeaway: require("../assets/icons/Restaurant.png"),
-  food: require("../assets/icons/Restaurant.png"),
-  bakery: require("../assets/icons/Restaurant.png"),
-  cafe: require("../assets/icons/Restaurant.png"),
-  bar: require("../assets/icons/Bar.png"),
-  movie_theater: require("../assets/icons/Party.png"),
-  night_club: require("../assets/icons/Party.png"),
+  restaurant: require("../../../assets/icons/Restaurant.png"),
+  meal_takeaway: require("../../../assets/icons/Restaurant.png"),
+  food: require("../../../assets/icons/Restaurant.png"),
+  bakery: require("../../../assets/icons/Restaurant.png"),
+  cafe: require("../../../assets/icons/Restaurant.png"),
+  bar: require("../../../assets/icons/Bar.png"),
+  movie_theater: require("../../../assets/icons/Party.png"),
+  night_club: require("../../../assets/icons/Party.png"),
 };
 
 // =============================================
@@ -42,7 +47,7 @@ const getMarkerIcon = (placeTypes: string[]) => {
     }
   }
   console.log("⚠️ No matching type found, using default restaurant icon");
-  return require("../assets/icons/Restaurant.png");
+  return require("../../../assets/icons/Restaurant.png");
 };
 
 // =============================================
@@ -53,19 +58,49 @@ const SmoothAnimatedMarker: React.FC<SmoothAnimatedMarkerProps> = ({
   shouldShowIcon,
   coordinates,
   onPress,
+  isFocused = false, // Valor padrão false
 }) => {
+  const { triggerMarkerPress, triggerHaptic } = useHaptics();
+  const wasFocusedRef = useRef(false); // Rastreia se estava em foco anteriormente
+  
   const iconOpacity = useRef(
-    new Animated.Value(shouldShowIcon ? 1 : 0)
+    new Animated.Value(shouldShowIcon || isFocused ? 1 : 0)
   ).current;
-  const dotOpacity = useRef(new Animated.Value(shouldShowIcon ? 0 : 1)).current;
+  const dotOpacity = useRef(new Animated.Value(shouldShowIcon || isFocused ? 0 : 1)).current;
   const bounceAnim = useRef(new Animated.Value(1)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
+  const focusScaleAnim = useRef(new Animated.Value(BASE_SCALE)).current; // Começa com escala base (menor)
   const [isTracking, setIsTracking] = useState(true);
+
+  // Efeito para animar o foco do marker
+  useEffect(() => {
+    if (isFocused && shouldShowIcon) {
+      Animated.timing(focusScaleAnim, {
+        toValue: FOCUS_SCALE,
+        duration: FOCUS_ANIMATION_DURATION,
+        useNativeDriver: true,
+      }).start();
+    } else {
+      // Reset para escala base ao perder o foco ou ao trocar para modo ponto
+      focusScaleAnim.setValue(BASE_SCALE);
+    }
+  }, [isFocused, shouldShowIcon, focusScaleAnim]);
+
+  // Efeito para vibrar quando o marker for focado
+  useEffect(() => {
+    // Vibra apenas quando o marker ENTRA em foco (não estava focado antes)
+    if (isFocused && !wasFocusedRef.current) {
+      triggerHaptic('light');
+    }
+    
+    // Atualiza o estado anterior
+    wasFocusedRef.current = isFocused;
+  }, [isFocused, triggerHaptic]);
 
   useEffect(() => {
     setIsTracking(true);
-    const animations = shouldShowIcon
+    const animations = (shouldShowIcon || isFocused)
       ? [
           Animated.timing(iconOpacity, {
             toValue: 1,
@@ -92,7 +127,7 @@ const SmoothAnimatedMarker: React.FC<SmoothAnimatedMarkerProps> = ({
         ];
 
     Animated.parallel(animations).start(() => setIsTracking(false));
-  }, [shouldShowIcon, iconOpacity, dotOpacity]);
+  }, [shouldShowIcon, isFocused, iconOpacity, dotOpacity]);
 
   const handlePress = () => {
     const bounceSequence = Animated.sequence([
@@ -136,12 +171,29 @@ const SmoothAnimatedMarker: React.FC<SmoothAnimatedMarkerProps> = ({
     } else {
       pulseSequence.start();
     }
+    
+    // Vibração ao pressionar o marker
+    triggerMarkerPress();
+    
     if (onPress) {
       onPress();
     }
   };
 
-  const markerIcon = getMarkerIcon(place.types);
+  const markerIcon = getMarkerIcon(place.types ?? []);
+
+  // Gera uma rotação aleatória fixa para cada marker (efeito adesivo)
+  const randomRotation = useMemo(() => {
+    const str = `${place.id}-${place.name}`;
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = ((hash << 5) - hash) + str.charCodeAt(i);
+      hash |= 0; // força 32 bits
+    }
+    // Gera um valor entre -20 e +20 graus
+    const angle = ((hash % 5) - 15); 
+    return angle;
+  }, [place.id, place.name]);
 
   return (
     <Marker
@@ -152,17 +204,20 @@ const SmoothAnimatedMarker: React.FC<SmoothAnimatedMarkerProps> = ({
       onPress={handlePress}
     >
       <View style={styles.markerContainer}>
-        <Animated.View
-          style={[
-            styles.iconContainer,
-            {
-              opacity: iconOpacity,
-              transform: [{ scale: Animated.multiply(bounceAnim, scaleAnim) }],
-            },
-          ]}
-        >
-          <Image source={markerIcon} style={styles.markerIcon} />
-        </Animated.View>
+        {/* Só renderiza o visual completo se shouldShowIcon for true */}
+        {shouldShowIcon ? (
+          <Animated.View
+            style={[
+              styles.iconContainer,
+              {
+                transform: [{ scale: focusScaleAnim }],
+              },
+            ]}
+          >
+            <Image source={markerIcon} style={styles.markerIcon} />
+          </Animated.View>
+        ) : null}
+        {/* O ponto (dot) sempre é renderizado */}
         <Animated.View
           style={[
             styles.dotContainer,
@@ -184,15 +239,15 @@ const SmoothAnimatedMarker: React.FC<SmoothAnimatedMarkerProps> = ({
 const styles = StyleSheet.create({
   markerContainer: {
     position: "relative",
-    width: 53,
-    height: 54,
+    width: 50,
+    height: 50,
     justifyContent: "center",
     alignItems: "center",
   },
   iconContainer: {
     position: "absolute",
-    width: 53,
-    height: 54,
+    width: 30,
+    height: 30,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -203,7 +258,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  markerIcon: { width: 40, height: 40, resizeMode: "contain" },
+  markerIcon: { width: 25, height: 25, resizeMode: "contain" },
   dotMarker: {
     width: 20,
     height: 20,
@@ -222,7 +277,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 2,
     elevation: 3,
-  },
+  }
 });
 
 export default SmoothAnimatedMarker;

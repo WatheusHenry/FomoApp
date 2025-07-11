@@ -78,3 +78,41 @@ export const TYPE_TRANSLATIONS: { [key: string]: string } = {
   establishment: "Estabelecimento",
   premise: "Local",
 };
+
+// Tipos de lugares suportados
+export const PLACE_TYPES = {
+  RESTAURANT: 'restaurant',
+  BAR: 'bar',
+  CAFE: 'cafe',
+  NIGHT_CLUB: 'night_club',
+  PARTY: 'party',
+  ENTERTAINMENT: 'entertainment',
+} as const;
+
+// Ícones para cada tipo de lugar
+export const PLACE_ICONS = {
+  [PLACE_TYPES.RESTAURANT]: '🍽️',
+  [PLACE_TYPES.BAR]: '🍺',
+  [PLACE_TYPES.CAFE]: '☕',
+  [PLACE_TYPES.NIGHT_CLUB]: '🎵',
+  [PLACE_TYPES.PARTY]: '🎉',
+  [PLACE_TYPES.ENTERTAINMENT]: '🎮',
+} as const;
+
+// Configurações de busca
+export const SEARCH_CONFIG = {
+  DEFAULT_RADIUS: 1000, // metros
+  MAX_RADIUS: 5000,
+  MIN_RADIUS: 100,
+  DEFAULT_LIMIT: 20,
+  MAX_LIMIT: 50,
+} as const;
+
+// Filtros de preço
+export const PRICE_LEVELS = {
+  FREE: 0,
+  INEXPENSIVE: 1,
+  MODERATE: 2,
+  EXPENSIVE: 3,
+  VERY_EXPENSIVE: 4,
+} as const;

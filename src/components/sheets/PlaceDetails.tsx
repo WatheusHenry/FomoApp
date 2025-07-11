@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { fetchPlaceDetails } from "@/utils/fetchPlaceDetails";
-import { Place } from "@/interfaces/Place";
+import { Place } from "@/types/place";
 
 interface PlaceDetailsProps {
   place: Place | null;
@@ -22,22 +22,35 @@ const PlaceDetails = forwardRef<BottomSheet, PlaceDetailsProps>(
     const [details, setDetails] = useState<Place | null>(null);
     const [loading, setLoading] = useState(false);
 
+    // Reset details when place changes
     useEffect(() => {
-      if (!place) return;
-      const loadDetails = async () => {
-        try {
-          setLoading(true);
-          const data = await fetchPlaceDetails(place.id);
-          setDetails(data);
-        } catch (err) {
-          console.error("❌ Erro ao buscar detalhes do local:", err);
-        } finally {
-          setLoading(false);
-        }
-      };
+      if (!place) {
+        setDetails(null);
+        return;
+      }
+      
+      // const loadDetails = async () => {
+      //   try {
+      //     setLoading(true);
+      //     const data = await fetchPlaceDetails(place.id);
+      //     setDetails(data);
+      //   } catch (err) {
+      //     console.error("❌ Erro ao buscar detalhes do local:", err);
+      //   } finally {
+      //     setLoading(false);
+      //   }
+      // };
 
-      loadDetails();
+      // loadDetails();
     }, [place]);
+
+    // Handle bottom sheet close
+    const handleSheetClose = () => {
+      console.log('📱 Bottom sheet fechado');
+      onClose();
+    };
+
+    // Don't render if no place is selected
     if (!place) return null;
 
     const shownPlace = details || place;
@@ -59,7 +72,7 @@ const PlaceDetails = forwardRef<BottomSheet, PlaceDetailsProps>(
         index={-1}
         snapPoints={snapPoints}
         enablePanDownToClose={true}
-        onClose={onClose}
+        onClose={handleSheetClose}
         backgroundStyle={styles.bottomSheetBackground}
         handleIndicatorStyle={styles.handleIndicator}
       >
@@ -74,12 +87,18 @@ const PlaceDetails = forwardRef<BottomSheet, PlaceDetailsProps>(
             </View>
           </View>
 
+          {loading && (
+            <View style={styles.loadingContainer}>
+              <Text style={styles.loadingText}>Carregando detalhes...</Text>
+            </View>
+          )}
+
           {details?.photos && details.photos.length > 0 && (
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               {details.photos.slice(0, 5).map((photo, index) => (
                 <View key={index} style={{ marginRight: 10 }}>
                   <Image
-                    source={{ uri: photo.url }}
+                    source={{ uri: photo }}
                     style={{
                       width: 200,
                       height: 150,
@@ -198,8 +217,16 @@ const styles = StyleSheet.create({
     backgroundColor: "#3F444B",
     borderWidth: 2,
     borderColor: "#2C3035",
-    color: "#B5B5B5",
+    color: "#FFF",
     fontWeight: "600",
+  },
+  loadingContainer: {
+    padding: 20,
+    alignItems: 'center',
+  },
+  loadingText: {
+    color: "#B5B5B5",
+    fontSize: 16,
   },
 });
 
