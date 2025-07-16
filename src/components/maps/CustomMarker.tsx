@@ -203,7 +203,6 @@ const SmoothAnimatedMarker: React.FC<SmoothAnimatedMarkerProps> = ({
       coordinate={coordinates}
       onPress={handlePress}
     >
-<<<<<<< HEAD:components/CustomMarker.tsx
       <Animated.View
         style={[
           styles.iconContainer,
@@ -223,34 +222,6 @@ const SmoothAnimatedMarker: React.FC<SmoothAnimatedMarkerProps> = ({
       >
         <View style={styles.dot} />
       </Animated.View>
-=======
-      <View style={styles.markerContainer}>
-        {/* Só renderiza o visual completo se shouldShowIcon for true */}
-        {shouldShowIcon ? (
-          <Animated.View
-            style={[
-              styles.iconContainer,
-              {
-                transform: [{ scale: focusScaleAnim }],
-              },
-            ]}
-          >
-            <Image source={markerIcon} style={styles.markerIcon} />
-          </Animated.View>
-        ) : null}
-        {/* O ponto (dot) sempre é renderizado */}
-        <Animated.View
-          style={[
-            styles.dotContainer,
-            { opacity: dotOpacity, transform: [{ scale: pulseAnim }] },
-          ]}
-        >
-          <View style={styles.dotMarker}>
-            <View style={styles.dot} />
-          </View>
-        </Animated.View>
-      </View>
->>>>>>> cf3fa05ab90d3d1a4e705bf8416e4c2da3404609:src/components/maps/CustomMarker.tsx
     </Marker>
   );
 };
@@ -269,11 +240,7 @@ const styles = StyleSheet.create({
   iconContainer: {
     position: "absolute",
     width: 30,
-<<<<<<< HEAD:components/CustomMarker.tsx
     height: 35,
-=======
-    height: 30,
->>>>>>> cf3fa05ab90d3d1a4e705bf8416e4c2da3404609:src/components/maps/CustomMarker.tsx
     justifyContent: "center",
     alignItems: "center",
   },
@@ -284,7 +251,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-<<<<<<< HEAD:components/CustomMarker.tsx
   markerIcon: {
     width: 30,
     height: 30,
@@ -294,9 +260,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
   },
-=======
-  markerIcon: { width: 25, height: 25, resizeMode: "contain" },
->>>>>>> cf3fa05ab90d3d1a4e705bf8416e4c2da3404609:src/components/maps/CustomMarker.tsx
   dotMarker: {
     width: 30,
     height: 30,

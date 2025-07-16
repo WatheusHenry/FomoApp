@@ -1,14 +1,15 @@
-import HomeList from "@/components/HomeList";
-import PlaceDetails from "@/components/sheets/PlaceDetails";
+/* eslint-disable import/no-unresolved */
+import HomeList from "../src/components/common/HomeList";
+import PlaceDetails from "../src/components/sheets/PlaceDetails";
 import { fetchNearbyPlaces } from "@/utils/fetchNearbyPlaces";
 import BottomSheet from "@gorhom/bottom-sheet";
 import * as Location from "expo-location";
 import React, { useEffect, useRef, useState } from "react";
 import { Alert, StyleSheet, Text, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import LocationComponent from "../components/Location";
-import LocationError from "../components/LocationError";
-import MapContainer from "../components/MapContainer";
+import LocationComponent from "../src/components/common/Location";
+import LocationError from "../src/components/common/LocationError";
+import MapContainer from "../src/components/maps/MapContainer";
 
 // Interface para o tipo Place
 interface Place {
