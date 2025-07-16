@@ -1,17 +1,14 @@
-import React, { useEffect, useState, useRef } from "react";
-import { StyleSheet, Text, View, Alert } from "react-native";
+import HomeList from "@/components/HomeList";
+import PlaceDetails from "@/components/sheets/PlaceDetails";
+import { fetchNearbyPlaces } from "@/utils/fetchNearbyPlaces";
+import BottomSheet from "@gorhom/bottom-sheet";
 import * as Location from "expo-location";
+import React, { useEffect, useRef, useState } from "react";
+import { Alert, StyleSheet, Text, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import LocationComponent from "../components/Location";
-import WheaterComponent from "../components/Wheater";
-import MapContainer from "../components/MapContainer";
 import LocationError from "../components/LocationError";
-import HomeButtons from "@/components/HomeButtons";
-import SearchPlaces from "@/components/sheets/SearchPlaces";
-import PlaceDetails from "@/components/sheets/PlaceDetails";
-import BottomSheet from "@gorhom/bottom-sheet";
-import { fetchNearbyPlaces } from "@/utils/fetchNearbyPlaces";
-import HomeList from "@/components/HomeList";
+import MapContainer from "../components/MapContainer";
 
 // Interface para o tipo Place
 interface Place {
@@ -32,11 +29,11 @@ interface Place {
   };
   formatted_phone_number?: string;
   website?: string;
-  photos?: Array<{
+  photos?: {
     photo_reference: string;
     width: number;
     height: number;
-  }>;
+  }[];
 }
 
 export default function Index() {

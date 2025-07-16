@@ -1,4 +1,4 @@
-import { Place } from "@/interfaces/Place";
+import { Place } from "@/types/place";
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import React, { forwardRef, useState } from "react";
 import {
@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useHaptics } from "@/hooks/useHaptics";
 
 interface SearchPlacesProps {
   places: Place[];
@@ -20,14 +21,14 @@ interface SearchPlacesProps {
 
 const TYPE_ICON_MAP: { [key: string]: any } = {
   // Alimentação
-  restaurant: require("../../assets/icons/Restaurant.png"),
-  meal_takeaway: require("../../assets/icons/Restaurant.png"),
-  food: require("../../assets/icons/Restaurant.png"),
-  bakery: require("../../assets/icons/Restaurant.png"),
-  cafe: require("../../assets/icons/Restaurant.png"),
-  bar: require("../../assets/icons/Bar.png"),
-  movie_theater: require("../../assets/icons/Party.png"),
-  night_club: require("../../assets/icons/Party.png"),
+  restaurant: require("../../../assets/icons/Restaurant.png"),
+  meal_takeaway: require("../../../assets/icons/Restaurant.png"),
+  food: require("../../../assets/icons/Restaurant.png"),
+  bakery: require("../../../assets/icons/Restaurant.png"),
+  cafe: require("../../../assets/icons/Restaurant.png"),
+  bar: require("../../../assets/icons/Bar.png"),
+  movie_theater: require("../../../assets/icons/Party.png"),
+  night_club: require("../../../assets/icons/Party.png"),
 };
 
 const getPlaceIcon = (placeTypes: string[]) => {
@@ -36,12 +37,13 @@ const getPlaceIcon = (placeTypes: string[]) => {
       return TYPE_ICON_MAP[type];
     }
   }
-  return require("../../assets/icons/Restaurant.png");
+  return require("../../../assets/icons/Restaurant.png");
 };
 
 const SearchPlaces = forwardRef<BottomSheet, SearchPlacesProps>(
   ({ places, loading, onRefresh }, ref) => {
     const [searchQuery, setSearchQuery] = useState("");
+    const { triggerButtonPress } = useHaptics();
 
     const filteredPlaces = places.filter(
       (place) =>
@@ -50,15 +52,18 @@ const SearchPlaces = forwardRef<BottomSheet, SearchPlacesProps>(
     );
 
     const renderPlaceItem = (place: Place) => {
-      const icon = getPlaceIcon(place.types);
+      const icon = getPlaceIcon(place.types || []);
+
+      const handlePlacePress = () => {
+        triggerButtonPress(); // 🔥 Vibração ao tocar em um lugar
+        console.log("Local selecionado:", place.name);
+      };
 
       return (
         <TouchableOpacity
           key={place.id}
           style={styles.placeItem}
-          onPress={() => {
-            console.log("Local selecionado:", place.name);
-          }}
+          onPress={handlePlacePress}
         >
           <Image source={icon} style={styles.placeIcon} />
           <View style={styles.placeInfo}>
@@ -71,6 +76,11 @@ const SearchPlaces = forwardRef<BottomSheet, SearchPlacesProps>(
           </View>
         </TouchableOpacity>
       );
+    };
+
+    const handleRefreshPress = () => {
+      triggerButtonPress(); // 🔥 Vibração ao tocar no botão de refresh
+      onRefresh();
     };
 
     return (
@@ -87,7 +97,7 @@ const SearchPlaces = forwardRef<BottomSheet, SearchPlacesProps>(
         <View style={styles.contentContainer}>
           <View style={styles.header}>
             <Image
-              source={require("../../assets/icons/Search.png")}
+              source={require("../../../assets/icons/Search.png")}
               style={styles.headerIcon}
             />
             <Text style={styles.headerText}>Locais Próximos</Text>
@@ -131,7 +141,7 @@ const SearchPlaces = forwardRef<BottomSheet, SearchPlacesProps>(
                     </Text>
                     <TouchableOpacity
                       style={styles.refreshButton}
-                      onPress={onRefresh}
+                      onPress={handleRefreshPress}
                     >
                       <Text style={styles.refreshButtonText}>
                         Tentar novamente
@@ -155,6 +165,7 @@ const styles = StyleSheet.create({
   contentContainer: {
     paddingHorizontal: 20,
     paddingBottom: 30,
+    zIndex: 10,
   },
   header: {
     flexDirection: "row",
