@@ -27,14 +27,14 @@ const FOCUS_SCALE = 2; // Escala quando o marker está em foco (grande)
 const FOCUS_ANIMATION_DURATION = 200; // Duração da animação de foco
 
 const TYPE_ICON_MAP: { [key: string]: any } = {
-  restaurant: require("../assets/icons/Food.png"),
-  meal_takeaway: require("../assets/icons/Food.png"),
-  food: require("../assets/icons/Food.png"),
-  bakery: require("../assets/icons/Coffee.png"),
-  cafe: require("../assets/icons/Coffee.png"),
-  bar: require("../assets/icons/Beer.png"),
-  movie_theater: require("../assets/icons/Party.png"),
-  night_club: require("../assets/icons/Party.png"),
+  restaurant: require("../../../assets/icons/Food.png"),
+  meal_takeaway: require("../../../assets/icons/Food.png"),
+  food: require("../../../assets/icons/Food.png"),
+  bakery: require("../../../assets/icons/Coffee.png"),
+  cafe: require("../../../assets/icons/Coffee.png"),
+  bar: require("../../../assets/icons/Beer.png"),
+  movie_theater: require("../../../assets/icons/Party.png"),
+  night_club: require("../../../assets/icons/Party.png"),
 };
 
 // =============================================

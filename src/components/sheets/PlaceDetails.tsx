@@ -89,18 +89,18 @@ const PlaceDetails = forwardRef<BottomSheet, PlaceDetailsProps>(
           <View style={{ flexDirection: "row", gap: 10 }}>
             <TouchableOpacity style={styles.WorkingHours}>
               <Image
-                source={require("../../assets/icons/GreenDot.png")}
+                source={require("../../../assets/icons/GreenDot.png")}
               ></Image>
               <Text style={styles.TextPills}>Aberto</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.InfoPills}>
               <Image
-                source={require("../../assets/icons/Acessibility.png")}
+                source={require("../../../assets/icons/Acessibility.png")}
               ></Image>
               <Text style={styles.TextPills}>Acessivel</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.InfoPills}>
-              <Image source={require("../../assets/icons/Loc.png")}></Image>
+              <Image source={require("../../../assets/icons/Loc.png")}></Image>
               <Text style={styles.TextPills}>0,7 km de você</Text>
             </TouchableOpacity>
           </View>

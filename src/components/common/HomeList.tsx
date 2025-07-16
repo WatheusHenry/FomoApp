@@ -13,14 +13,14 @@ import {
 } from "react-native";
 
 const TYPE_ICON_MAP: { [key: string]: any } = {
-  restaurant: require("../assets/icons/Food.png"),
-  meal_takeaway: require("../assets/icons/Food.png"),
-  food: require("../assets/icons/Food.png"),
-  bakery: require("../assets/icons/Coffee.png"),
-  cafe: require("../assets/icons/Coffee.png"),
-  bar: require("../assets/icons/Beer.png"),
-  movie_theater: require("../assets/icons/Party.png"),
-  night_club: require("../assets/icons/Party.png"),
+  restaurant: require("../../../assets/icons/Food.png"),
+  meal_takeaway: require("../../../assets/icons/Food.png"),
+  food: require("../../../assets/icons/Food.png"),
+  bakery: require("../../../assets/icons/Coffee.png"),
+  cafe: require("../../../assets/icons/Coffee.png"),
+  bar: require("../../../assets/icons/Beer.png"),
+  movie_theater: require("../../../assets/icons/Party.png"),
+  night_club: require("../../../assets/icons/Party.png"),
 };
 
 const getPlaceIcon = (placeTypes: string[]) => {
@@ -29,7 +29,7 @@ const getPlaceIcon = (placeTypes: string[]) => {
       return TYPE_ICON_MAP[type];
     }
   }
-  return require("../assets/icons/Restaurant.png");
+  return require("../../../assets/icons/Restaurant.png");
 };
 
 interface HomeListProps {
