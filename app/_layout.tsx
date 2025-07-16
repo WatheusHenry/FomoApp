@@ -25,6 +25,8 @@ import {
   Roboto_900Black_Italic,
 } from "@expo-google-fonts/roboto";
 
+import { Anton_400Regular } from "@expo-google-fonts/anton";
+
 import { SplashScreen, Stack } from "expo-router";
 import { useEffect } from "react";
 
@@ -50,6 +52,8 @@ export default function RootLayout() {
     Roboto_300Light,
     Roboto_200ExtraLight,
     Roboto_100Thin,
+
+    Anton_400Regular,
   });
 
   useEffect(() => {

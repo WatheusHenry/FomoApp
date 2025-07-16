@@ -11,6 +11,7 @@ import SearchPlaces from "@/components/sheets/SearchPlaces";
 import PlaceDetails from "@/components/sheets/PlaceDetails";
 import BottomSheet from "@gorhom/bottom-sheet";
 import { fetchNearbyPlaces } from "@/utils/fetchNearbyPlaces";
+import HomeList from "@/components/HomeList";
 
 // Interface para o tipo Place
 interface Place {
@@ -47,8 +48,8 @@ export default function Index() {
   const [placesLoading, setPlacesLoading] = useState(false);
 
   const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
+  const [previousCameraState, setPreviousCameraState] = useState(null);
 
-  const searchBottomSheetRef = useRef<BottomSheet>(null);
   const placeDetailsBottomSheetRef = useRef<BottomSheet>(null);
 
   useEffect(() => {
@@ -65,10 +66,6 @@ export default function Index() {
     } finally {
       setPlacesLoading(false);
     }
-  };
-
-  const handleOpenSearchSheet = () => {
-    searchBottomSheetRef.current?.snapToIndex(1);
   };
 
   const handleMarkerPress = (place: Place) => {
@@ -135,22 +132,14 @@ export default function Index() {
       <MapContainer
         location={location}
         places={places}
+        focusedPlace={selectedPlace}
         onMarkerPress={handleMarkerPress}
+        onClearFocus={() => setSelectedPlace(null)}
+        onCameraStateChange={setPreviousCameraState}
+        shouldResetCamera={!selectedPlace && previousCameraState}
       />
       <LocationComponent />
-      <WheaterComponent />
-
-      <HomeButtons onSearchPress={handleOpenSearchSheet} />
-
-      {/* Bottom Sheet para busca de lugares */}
-      <SearchPlaces
-        ref={searchBottomSheetRef}
-        places={places}
-        loading={placesLoading}
-        onRefresh={() =>
-          loadNearbyPlaces(location.latitude, location.longitude)
-        }
-      />
+      <HomeList places={places} loading={loading} />
 
       {/* Bottom Sheet para detalhes do lugar */}
       <PlaceDetails

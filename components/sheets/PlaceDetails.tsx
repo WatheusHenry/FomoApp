@@ -1,15 +1,15 @@
+import { Place } from "@/interfaces/Place";
+import { fetchPlaceDetails } from "@/utils/fetchPlaceDetails";
+import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import React, { forwardRef, useEffect, useMemo, useState } from "react";
 import {
+  Image,
+  Platform,
   StyleSheet,
   Text,
-  View,
   TouchableOpacity,
-  ScrollView,
-  Image,
+  View,
 } from "react-native";
-import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
-import { fetchPlaceDetails } from "@/utils/fetchPlaceDetails";
-import { Place } from "@/interfaces/Place";
 
 interface PlaceDetailsProps {
   place: Place | null;
@@ -18,7 +18,7 @@ interface PlaceDetailsProps {
 
 const PlaceDetails = forwardRef<BottomSheet, PlaceDetailsProps>(
   ({ place, onClose }, ref) => {
-    const snapPoints = useMemo(() => ["25%", "60%"], []);
+    const snapPoints = useMemo(() => ["25%", "50%"], []);
     const [details, setDetails] = useState<Place | null>(null);
     const [loading, setLoading] = useState(false);
 
@@ -66,7 +66,6 @@ const PlaceDetails = forwardRef<BottomSheet, PlaceDetailsProps>(
         <BottomSheetScrollView style={styles.content}>
           <View style={styles.header}>
             <View style={styles.headerLeft}>
-              <TouchableOpacity style={styles.state}></TouchableOpacity>
               <View style={styles.headerText}>
                 <Text style={styles.placeName}>{place.name}</Text>
                 <Text style={styles.placeAddress}>{shownPlace.address}</Text>
@@ -74,24 +73,24 @@ const PlaceDetails = forwardRef<BottomSheet, PlaceDetailsProps>(
             </View>
           </View>
 
-          {details?.photos && details.photos.length > 0 && (
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              {details.photos.slice(0, 5).map((photo, index) => (
-                <View key={index} style={{ marginRight: 10 }}>
-                  <Image
-                    source={{ uri: photo.url }}
-                    style={{
-                      width: 200,
-                      height: 150,
-                      borderRadius: 12,
-                      backgroundColor: "#444",
-                    }}
-                    resizeMode="cover"
-                  />
-                </View>
-              ))}
-            </ScrollView>
-          )}
+          <View style={{ flexDirection: "row", gap: 10 }}>
+            <TouchableOpacity style={styles.WorkingHours}>
+              <Image
+                source={require("../../assets/icons/GreenDot.png")}
+              ></Image>
+              <Text style={styles.TextPills}>Aberto</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.InfoPills}>
+              <Image
+                source={require("../../assets/icons/Acessibility.png")}
+              ></Image>
+              <Text style={styles.TextPills}>Acessivel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.InfoPills}>
+              <Image source={require("../../assets/icons/Loc.png")}></Image>
+              <Text style={styles.TextPills}>0,7 km de você</Text>
+            </TouchableOpacity>
+          </View>
 
           <View style={styles.pillsContiner}>
             <Text style={{ color: "#989898", fontWeight: "600" }}>
@@ -123,9 +122,17 @@ const PlaceDetails = forwardRef<BottomSheet, PlaceDetailsProps>(
 
 const styles = StyleSheet.create({
   bottomSheetBackground: {
-    backgroundColor: "#2C3035",
+    backgroundColor: "#FFFFFF",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 10.84,
+    elevation: 5,
   },
   handleIndicator: {
     backgroundColor: "#DDD",
@@ -147,19 +154,25 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   headerText: {
-    marginLeft: 12,
     flex: 1,
+    width: "50%",
   },
   placeName: {
     fontSize: 20,
-    fontWeight: "bold",
-    color: "#FFF",
-    marginBottom: 4,
+    fontFamily: Platform.select({
+      android: "Onest_900Black",
+      ios: "Onest_900Black",
+    }),
+    color: "#3676FF",
   },
   placeAddress: {
-    fontSize: 14,
-    fontWeight: "bold",
-    color: "#B5B5B5",
+    fontSize: 12,
+    width: "70%",
+    fontFamily: Platform.select({
+      android: "Onest_500Medium",
+      ios: "Onest_500Medium",
+    }),
+    color: "#808080",
   },
   state: {
     borderColor: "#5D6265",
@@ -183,23 +196,49 @@ const styles = StyleSheet.create({
   pillsContiner: {
     marginTop: 20,
     marginBottom: 10,
-    backgroundColor: "#35393E",
+    backgroundColor: "#F4F4F4",
     padding: 10,
     borderRadius: 10,
     borderStyle: "dashed",
-    borderWidth: 1,
-    borderColor: "#3F444B",
   },
   pill: {
     paddingVertical: 7,
     paddingHorizontal: 10,
     borderRadius: 10,
     fontSize: 16,
-    backgroundColor: "#3F444B",
-    borderWidth: 2,
-    borderColor: "#2C3035",
-    color: "#B5B5B5",
+    fontFamily: Platform.select({
+      android: "Onest_500Medium",
+      ios: "Onest_500Medium",
+    }),
+    backgroundColor: "#FFFFFF",
+    color: "#2C3035",
     fontWeight: "600",
+  },
+  WorkingHours: {
+    flexDirection: "row",
+    padding: 10,
+    borderRadius: 10,
+    color: "#44aa32ff",
+    gap: 5,
+    alignContent: "center",
+    alignItems: "center",
+    backgroundColor: "#95EF17",
+  },
+  InfoPills: {
+    flexDirection: "row",
+    padding: 10,
+    borderRadius: 10,
+    alignContent: "center",
+    gap: 5,
+    alignItems: "center",
+    backgroundColor: "#F4F4F4",
+  },
+  TextPills: {
+    fontFamily: Platform.select({
+      android: "Onest_500Medium",
+      ios: "Onest_500Medium",
+    }),
+    color: "#7A7A7A",
   },
 });
 

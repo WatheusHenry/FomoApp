@@ -1,4 +1,5 @@
 interface Place {
+  filter(arg0: (place: any) => any): unknown;
   id: string;
   name: string;
   address: string;

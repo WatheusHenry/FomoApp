@@ -3,9 +3,9 @@ import { Platform, StyleSheet, Text, View } from "react-native";
 export default function Location() {
   return (
     <View style={styles.content}>
-      <View style={styles.row}>
-        <Text style={styles.title}>Marília</Text>
-        <Text style={styles.subtitle}>SP</Text>
+      <View>
+        <Text style={styles.title}>Monte Castelo</Text>
+        <Text style={styles.subtitle}>Rua Padre Roma</Text>
       </View>
     </View>
   );
@@ -22,19 +22,17 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    color: "#fff",
+    color: "#2C3035",
     fontFamily: Platform.select({
-      android: "Roboto_900Black_Italic",
-      ios: "Roboto_900Black_Italic",
+      android: "Anton_400Regular",
+      ios: "Anton_400Regular",
     }),
   },
   subtitle: {
-    fontSize: 16,
-    color: "#787B80",
-    fontFamily: Platform.select({
-      android: "Roboto_900Black_Italic",
-      ios: "Roboto_900Black_Italic",
-    }),
-    marginLeft: 4,
+    width: 120,
+    padding: 1,
+    backgroundColor: "white",
+    fontSize: 14,
+    color: "#000000ff",
   },
 });

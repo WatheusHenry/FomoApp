@@ -22,12 +22,12 @@ const ANIMATION_DURATION = 200;
 const BOUNCE_DURATION = 300;
 
 const TYPE_ICON_MAP: { [key: string]: any } = {
-  restaurant: require("../assets/icons/Restaurant.png"),
-  meal_takeaway: require("../assets/icons/Restaurant.png"),
-  food: require("../assets/icons/Restaurant.png"),
-  bakery: require("../assets/icons/Restaurant.png"),
-  cafe: require("../assets/icons/Restaurant.png"),
-  bar: require("../assets/icons/Bar.png"),
+  restaurant: require("../assets/icons/Food.png"),
+  meal_takeaway: require("../assets/icons/Food.png"),
+  food: require("../assets/icons/Food.png"),
+  bakery: require("../assets/icons/Coffee.png"),
+  cafe: require("../assets/icons/Coffee.png"),
+  bar: require("../assets/icons/Beer.png"),
   movie_theater: require("../assets/icons/Party.png"),
   night_club: require("../assets/icons/Party.png"),
 };
@@ -147,33 +147,29 @@ const SmoothAnimatedMarker: React.FC<SmoothAnimatedMarkerProps> = ({
     <Marker
       tracksViewChanges={isTracking}
       key={place.id}
-      anchor={{ x: 0.1, y: 0.1 }}
+      anchor={{ x: 0.5, y: 0.8 }}
       coordinate={coordinates}
       onPress={handlePress}
     >
-      <View style={styles.markerContainer}>
-        <Animated.View
-          style={[
-            styles.iconContainer,
-            {
-              opacity: iconOpacity,
-              transform: [{ scale: Animated.multiply(bounceAnim, scaleAnim) }],
-            },
-          ]}
-        >
-          <Image source={markerIcon} style={styles.markerIcon} />
-        </Animated.View>
-        <Animated.View
-          style={[
-            styles.dotContainer,
-            { opacity: dotOpacity, transform: [{ scale: pulseAnim }] },
-          ]}
-        >
-          <View style={styles.dotMarker}>
-            <View style={styles.dot} />
-          </View>
-        </Animated.View>
-      </View>
+      <Animated.View
+        style={[
+          styles.iconContainer,
+          {
+            opacity: iconOpacity,
+            transform: [{ scale: Animated.multiply(bounceAnim, scaleAnim) }],
+          },
+        ]}
+      >
+        <Image source={markerIcon} style={styles.markerIcon} />
+      </Animated.View>
+      <Animated.View
+        style={[
+          styles.dotContainer,
+          { opacity: dotOpacity, transform: [{ scale: pulseAnim }] },
+        ]}
+      >
+        <View style={styles.dot} />
+      </Animated.View>
     </Marker>
   );
 };
@@ -184,29 +180,37 @@ const SmoothAnimatedMarker: React.FC<SmoothAnimatedMarkerProps> = ({
 const styles = StyleSheet.create({
   markerContainer: {
     position: "relative",
-    width: 53,
-    height: 54,
+    width: 50,
+    height: 50,
     justifyContent: "center",
     alignItems: "center",
   },
   iconContainer: {
     position: "absolute",
-    width: 53,
-    height: 54,
+    width: 30,
+    height: 35,
     justifyContent: "center",
     alignItems: "center",
   },
   dotContainer: {
     position: "absolute",
-    width: 20,
-    height: 20,
+    width: 30,
+    height: 30,
     justifyContent: "center",
     alignItems: "center",
   },
-  markerIcon: { width: 40, height: 40, resizeMode: "contain" },
+  markerIcon: {
+    width: 30,
+    height: 30,
+    resizeMode: "contain",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+  },
   dotMarker: {
-    width: 20,
-    height: 20,
+    width: 30,
+    height: 30,
     justifyContent: "center",
     alignItems: "center",
   },
